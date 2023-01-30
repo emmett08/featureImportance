@@ -7,7 +7,7 @@ set.seed(2023)
 
 csv_file <- file.choose()
 data <- read.csv(csv_file)
-data <- lapply(data, as.is = TRUE)
+# data <- lapply(data, as.is = TRUE)
 
 # data <- lapply( data, function(col) as.numeric( gsub("-$|\\,", "", col) ) )
 # data[is.na(data)] <- 0
