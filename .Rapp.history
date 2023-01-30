@@ -1,0 +1,166 @@
+ls()
+install.packages("car") #
+install.packages("tidyverse") #
+library(car)#
+library(tidyverse) #read the csv file #
+my_data <- read.csv("/Users/EMR23/Desktop/my_data.csv") #run multivariate analysis to identify relationships #
+mlm <- manova(cbind(header1, header2, header3) ~ header4, data=my_data) #
+summary(mlm)
+install.packages("car") #
+install.packages("tidyverse") #
+library(car)#
+library(tidyverse) #read the csv file #
+my_data <- read.csv("/Users/EMR23/Desktop/my_data.csv") #run multivariate analysis to identify relationships #
+mlm <- manova(cbind(system.process.cpu.total.pct, system.process.memory.rss.pct, system.process.summary.running) ~ system.process.summary.sleeping, data=my_data) #
+summary(mlm)
+install packages("car") #
+install packages("tidyverse") #
+library(car)#
+library(tidyverse) #read the csv file #
+my_data <- read.csv("/Users/EMR23/Desktop/my_data.csv") #run multivariate analysis to identify relationships #
+mlm <- manova(cbind(system.process.cpu.total.pct, system.process.memory.rss.pct, system.process.summary.running) ~ system.process.summary.sleeping, data=my_data) #
+summary(mlm)
+library(car)#
+library(tidyverse) #read the csv file #
+my_data <- read.csv("/Users/EMR23/Desktop/my_data.csv")
+library(car)#
+library(tidyverse)#
+my_data <- read.csv("/Users/EMR23/Desktop/my_data.csv")
+ls()
+library(car)#
+library(tidyverse)#
+my_data <- read.csv("/Users/EMR23/Desktop/my_data.csv")
+namespace ‘rlang’ 0.4.12 is already loaded, but >= 1.0.6 is required
+remove.packages(rlang)
+install.packages("rlang")
+library(car)#
+library(tidyverse)#
+my_data <- read.csv("/Users/EMR23/Desktop/my_data.csv")
+install.packages("rlang")
+library(car)#
+library(tidyverse)#
+my_data <- read.csv("/Users/EMR23/Desktop/my_data.csv")
+library(car)#
+library(tidyverse)#
+library(rlang)#
+my_data <- read.csv("/Users/EMR23/Desktop/my_data.csv")
+install.packages("car")#
+install.packages("tidyverse")#
+library(car)#
+library(tidyverse)#
+#
+#read the csv file#
+my_data <- read.csv("my_data.csv")#
+#
+#run multivariate analysis to identify relationships#
+mlm <- manova(cbind(header1, header2, header3) ~ header4, data=my_data)#
+summary(mlm)
+library(car)#
+library(tidyverse)#
+my_data <- read.csv("/Users/EMR23/Desktop/my_data.csv")#
+mlm <- manova(cbind(host.cpu.usage,host.name,host.network.egress.bytes,host.network.egress.packets,host.network.ingress.bytes,host.network.ingress.packets,metricset.name,metricset.period,process.cpu.pct,process.cpu.start_time,process.memory.pct,service.type,system.cpu.cores,system.cpu.idle.norm.pct,system.cpu.idle.pct,system.cpu.nice.norm.pct,system.cpu.nice.pct,system.cpu.system.norm.pct,system.cpu.system.pct,system.cpu.total.norm.pct,system.cpu.total.pct,system.cpu.user.norm.pct) ~ system.cpu.user.pct, data=my_data)#
+summary(mlm)
+my_data
+library(car)#
+library(tidyverse)#
+my_data <- read.csv("/Users/EMR23/Desktop/my_data.csv")#
+mlm <- manova(cbind(host.cpu.usage,host.name,host.network.egress.bytes,host.network.egress.packets,host.network.ingress.bytes,host.network.ingress.packets,metricset.name,metricset.period,process.cpu.pct,process.cpu.start_time,process.memory.pct,service.type,system.cpu.cores,system.cpu.idle.norm.pct,system.cpu.idle.pct,system.cpu.nice.norm.pct,system.cpu.nice.pct,system.cpu.system.norm.pct,system.cpu.system.pct,system.cpu.total.norm.pct,system.cpu.total.pct,system.cpu.user.norm.pct) ~ system.cpu.user.pct, data=my_data)#
+summary(mlm)
+library(car)#
+library(tidyverse)#
+df <- read.csv("/Users/EMR23/Desktop/my_data.csv")#
+df$user_perf <- NA#
+mlm <- manova(cbind(host.cpu.usage,host.name,host.network.egress.bytes,host.network.egress.packets,host.network.ingress.bytes,host.network.ingress.packets,metricset.name,metricset.period,process.cpu.pct,process.cpu.start_time,process.memory.pct,service.type,system.cpu.cores,system.cpu.idle.norm.pct,system.cpu.idle.pct,system.cpu.nice.norm.pct,system.cpu.nice.pct,system.cpu.system.norm.pct,system.cpu.system.pct,system.cpu.total.norm.pct,system.cpu.total.pct,system.cpu.user.norm.pct) ~ user_perf, data=my_data)#
+summary(mlm)
+library(ggplot2)#
+library(factoextra)#
+data <- read.csv("/Users/EMR23/Desktop/my_data.csv")#
+colnames(data)#
+data_scaled <- scale(data)#
+pca <- prcomp(data_scaled, scale = TRUE)#
+pca$sdev^2/sum(pca$sdev^2)#
+cumprop <- cumsum(pca$sdev^2/sum(pca$sdev^2))#
+fviz_screeplot(pca, addlabels = TRUE, ylim = c(0, 1))#
+pca_results <- as.data.frame(pca$x)#
+fviz_pca_biplot(pca, label = "var", habillage = "ind", pointsize = 2)
+library(ggplot2)#
+library(factoextra)#
+data <- read.csv("/Users/EMR23/Desktop/my_data.csv", col_names = TRUE)#
+colnames(data)#
+data_scaled <- scale(data)#
+pca <- prcomp(data_scaled, scale = TRUE)#
+pca$sdev^2/sum(pca$sdev^2)#
+cumprop <- cumsum(pca$sdev^2/sum(pca$sdev^2))#
+fviz_screeplot(pca, addlabels = TRUE, ylim = c(0, 1))#
+pca_results <- as.data.frame(pca$x)#
+fviz_pca_biplot(pca, label = "var", habillage = "ind", pointsize = 2)
+library(ggplot2)#
+library(factoextra)#
+data <- read.csv("/Users/EMR23/Desktop/my_data.csv", header = TRUE)#
+colnames(data)#
+data_scaled <- scale(data)#
+pca <- prcomp(data_scaled, scale = TRUE)#
+pca$sdev^2/sum(pca$sdev^2)#
+cumprop <- cumsum(pca$sdev^2/sum(pca$sdev^2))#
+fviz_screeplot(pca, addlabels = TRUE, ylim = c(0, 1))#
+pca_results <- as.data.frame(pca$x)#
+fviz_pca_biplot(pca, label = "var", habillage = "ind", pointsize = 2)
+data
+library(ggplot2)#
+library(factoextra)#
+data <- read.csv("/Users/EMR23/Desktop/my_data.csv", header = TRUE)#
+colnames(data)#
+data_scaled <- scale(data)#
+pca <- prcomp(data_scaled, scale = TRUE)#
+pca$sdev^2/sum(pca$sdev^2)#
+cumprop <- cumsum(pca$sdev^2/sum(pca$sdev^2))#
+fviz_screeplot(pca, addlabels = TRUE, ylim = c(0, 1))#
+pca_results <- as.data.frame(pca$x)#
+fviz_pca_biplot(pca, label = "var", habillage = "ind", pointsize = 2)
+library(ggplot2)#
+library(factoextra)#
+data <- read.csv("/Users/EMR23/Desktop/my_data_copy.csv", header = TRUE)#
+colnames(data)#
+data_scaled <- scale(data)#
+pca <- prcomp(data_scaled, scale = TRUE)#
+pca$sdev^2/sum(pca$sdev^2)#
+cumprop <- cumsum(pca$sdev^2/sum(pca$sdev^2))#
+fviz_screeplot(pca, addlabels = TRUE, ylim = c(0, 1))#
+pca_results <- as.data.frame(pca$x)#
+fviz_pca_biplot(pca, label = "var", habillage = "ind", pointsize = 2)
+getwd
+getwd()
+setwd("/Users/EMR23/dev/emmett08/featureImportance/")
+source("ecml-demo/application_pi_simulation.R")
+install.packages("devtools")
+evtools::install_github("giuseppec/featureImportance")
+devtools::install_github("giuseppec/featureImportance")
+source("ecml-demo/application_pi_simulation.R")
+install.packages("pacman")
+source("ecml-demo/application_pi_simulation.R")
+pacman::p_load("rsm")
+source("ecml-demo/application_pi_simulation.R")
+devtools::install_github("giuseppec/featureImportance")
+source("ecml-demo/application_pi_simulation.R")
+pacman::p_load("rsm, farff")
+source("ecml-demo/application_pi_simulation.R")
+install.packages("BiocManager")
+BiocManager::install(version = "3.16")
+BiocManager::install()
+install.packages('BiocManager')
+chooseCRANmirror()
+install.packages('BiocManager')
+source("ecml-demo/application_pi_simulation.R")
+pacman::p_load("rsm,farff")
+pacman::p_load("farff")
+source("ecml-demo/application_pi_simulation.R")
+pacman::p_load("snow")
+source("ecml-demo/application_pi_simulation.R")
+pacman::p_load("mlr")
+source("ecml-demo/application_pi_simulation.R")
+pacman::p_load("OpenML")
+source("ecml-demo/application_pi_simulation.R")
+pacman::p_load("batchtools")
+source("ecml-demo/application_pi_simulation.R")
+source("ecml-demo/application_importance_realdata.R")
+source("ecml-demo/application_shapley_simulation.R")
