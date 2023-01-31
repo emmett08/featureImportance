@@ -1,17 +1,26 @@
+install.packages("mlr")
 library(mlr)
+install.packages("mlbench")
 library(mlbench)
+install.packages("ggplot2")
 library(ggplot2)
+install.packages("gridExtra")
 library(gridExtra)
+
+install.packages("devtools")
+devtools::install_github("emmett08/featureImportance")
+
 library(featureImportance)
+
 set.seed(2023)
 
-csv_file <- file.choose()
-data <- read.csv(csv_file)
+# csv_file <- file.choose()
+# data <- read.csv(csv_file)
 # data <- lapply(data, as.is = TRUE)
 
 # data <- lapply( data, function(col) as.numeric( gsub("-$|\\,", "", col) ) )
 # data[is.na(data)] <- 0
-saveRDS(data, file = "predictive_failure.rds")
+# saveRDS(data, file = "predictive_failure.rds")
 
 rds_object = file.choose()
 predictive_failure <- readRDS(rds_object)
@@ -39,6 +48,7 @@ obs.id = sample(1:nrow(test), 20)
 
 # Measure feature importance on test data
 imp = featureImportance(mod, data = test, replace.ids = obs.id, local = TRUE)
+saveRDS(data, file = "feature_importance_mod.rds")
 summary(imp)
 warnings()
 
@@ -55,7 +65,9 @@ grid.arrange(pi.curve, ici.curves, nrow = 1)
 rdesc = makeResampleDesc("CV", iter = 5)
 res = resample(lrn, node.task, resampling = rdesc, models = TRUE)
 imp = featureImportance(res, data = getTaskData(node.task), n.feat.perm = 20, local = TRUE)
+saveRDS(data, file = "feature_importance_res.rds")
 summary(imp)
+warnings()
 
 plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)
 

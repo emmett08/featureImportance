@@ -128,39 +128,721 @@ cumprop <- cumsum(pca$sdev^2/sum(pca$sdev^2))#
 fviz_screeplot(pca, addlabels = TRUE, ylim = c(0, 1))#
 pca_results <- as.data.frame(pca$x)#
 fviz_pca_biplot(pca, label = "var", habillage = "ind", pointsize = 2)
-getwd
+library(checkpoint)#
+checkpoint("2018-03-01", project = "ecml-demo/helper", forceProject = TRUE)#
+source("ecml-demo/helper/packages.R")#
+install()#
+library(featureImportance)#
+library(ggplot2)#
+library(gridExtra)#
+path = "ecml-demo/application_shapley_simulation"#
+unlink(path, recursive = TRUE)#
+reg = makeExperimentRegistry(#
+file.dir = path,#
+packages = c("featureImportance"),#
+source = paste0("ecml-demo/", c("helper/functions.R", "helper/packages.R")),#
+seed = 123)#
+#
+reg$cluster.functions = makeClusterFunctionsSocket(30)#
+#
+res = readRDS("application_shapley_simulation.Rds")#
+# use shorter learner name#
+res[, learner := factor(gsub("regr.", "", learner))]#
+# compute ratio of the importance values w.r.t feature "V3"#
+res[, ratio := mse/mse[feature == "V3"], by = c("method", "learner", "repl")]#
+#
+### Plot simulation results of all 500 repititions#
+shap = subset(res, method %in% c("pfi.diff", "pfi.ratio", "shapley") & feature != "V3")#
+new.names = setNames(expression(X[1]/X[3], X[2]/X[3]), c("V1", "V2"))#
+#
+pp = ggplot(data = shap, aes(x = feature, y = ratio)) + #
+  geom_boxplot(aes(fill = method), lwd = 0.2, outlier.size = 0.8) + #
+  facet_grid(. ~ learner, scales = "free") +#
+  scale_fill_grey(labels = c("PFI (Diff.)", "PFI (Ratio)", "SFIMP"), start = 0.4, end = 0.9) +#
+  scale_x_discrete(labels = new.names) +#
+  labs(title = "(b) Simulation with 500 repetitions", #
+    x = "Features involved to compute the ratio", y = "Value of the ratio")#
+#
+### Plot example of an individual repetition (2nd replication)#
+shap2 = subset(res, repl == 2 & method %in% c("shapley", "geP"))#
+# reorder features for plotting#
+feat.order = c("V3", "V2", "V1", "geP")#
+shap2$feature = factor(shap2$feature, levels = feat.order)#
+# change sign#
+shap2[, mse := round(ifelse(method == "geP", mse, -mse), 2)]#
+# add column containing proportion of explained importance#
+shap2[, perc := ifelse(feature == "geP", NA, mse/sum(mse[feature != "geP"])), by = "learner"]#
+# add column containing drop in MSE + proportion of explained importance#
+shap2[, lab := ifelse(feature == "geP", mse, paste0(mse, " (", round(perc*100, 0), "%)"))]#
+#
+col = c(gray.colors(3, start = 0.4, end = 0.9), hcl(h = 195, l = 65, c = 100))#
+col = setNames(col, feat.order)#
+legend = c("V1" = bquote(phi[1]), "V2" = bquote(phi[2]), #
+  "V3" = bquote(phi[3]), "geP" = bquote(widehat(GE)[P]))#
+#
+pp2 = ggplot(shap2, aes(x = learner, y = mse, fill = feature)) + #
+  geom_bar(stat = "identity", colour = "white", pos = "stack") + #
+  geom_text(aes(label = lab), position = position_stack(vjust = 0.5), size = 3) + #
+  coord_flip() + #
+  scale_fill_manual(values = col, name = " performance \n explained by", labels = legend) +#
+  labs(title = "(a) Comparing the model performance and SFIMP values across different models", #
+    x = "", y = "performance (MSE)")#
+#
+grid.arrange(pp2, pp, heights = c(3, 5))
 getwd()
-setwd("/Users/EMR23/dev/emmett08/featureImportance/")
-source("ecml-demo/application_pi_simulation.R")
+setwd("~/dev/emmett08/featureImportance")
+getwd()
+setwd("~/dev/emmett08/featureImportance/ecml-demo")
+getwd()
+setwd("~/dev/emmett08/featureImportance")
+getwd()
+library(checkpoint)#
+checkpoint("2018-03-01", project = "ecml-demo/helper", forceProject = TRUE)#
+source("ecml-demo/helper/packages.R")#
+install()#
+library(featureImportance)#
+library(ggplot2)#
+library(gridExtra)#
+path = "ecml-demo/application_shapley_simulation"#
+unlink(path, recursive = TRUE)#
+reg = makeExperimentRegistry(#
+file.dir = path,#
+packages = c("featureImportance"),#
+source = paste0("ecml-demo/", c("helper/functions.R", "helper/packages.R")),#
+seed = 123)#
+#
+reg$cluster.functions = makeClusterFunctionsSocket(30)#
+#
+res = readRDS("ecml-demo/application_shapley_simulation.Rds")#
+# use shorter learner name#
+res[, learner := factor(gsub("regr.", "", learner))]#
+# compute ratio of the importance values w.r.t feature "V3"#
+res[, ratio := mse/mse[feature == "V3"], by = c("method", "learner", "repl")]#
+#
+### Plot simulation results of all 500 repititions#
+shap = subset(res, method %in% c("pfi.diff", "pfi.ratio", "shapley") & feature != "V3")#
+new.names = setNames(expression(X[1]/X[3], X[2]/X[3]), c("V1", "V2"))#
+#
+pp = ggplot(data = shap, aes(x = feature, y = ratio)) + #
+  geom_boxplot(aes(fill = method), lwd = 0.2, outlier.size = 0.8) + #
+  facet_grid(. ~ learner, scales = "free") +#
+  scale_fill_grey(labels = c("PFI (Diff.)", "PFI (Ratio)", "SFIMP"), start = 0.4, end = 0.9) +#
+  scale_x_discrete(labels = new.names) +#
+  labs(title = "(b) Simulation with 500 repetitions", #
+    x = "Features involved to compute the ratio", y = "Value of the ratio")#
+#
+### Plot example of an individual repetition (2nd replication)#
+shap2 = subset(res, repl == 2 & method %in% c("shapley", "geP"))#
+# reorder features for plotting#
+feat.order = c("V3", "V2", "V1", "geP")#
+shap2$feature = factor(shap2$feature, levels = feat.order)#
+# change sign#
+shap2[, mse := round(ifelse(method == "geP", mse, -mse), 2)]#
+# add column containing proportion of explained importance#
+shap2[, perc := ifelse(feature == "geP", NA, mse/sum(mse[feature != "geP"])), by = "learner"]#
+# add column containing drop in MSE + proportion of explained importance#
+shap2[, lab := ifelse(feature == "geP", mse, paste0(mse, " (", round(perc*100, 0), "%)"))]#
+#
+col = c(gray.colors(3, start = 0.4, end = 0.9), hcl(h = 195, l = 65, c = 100))#
+col = setNames(col, feat.order)#
+legend = c("V1" = bquote(phi[1]), "V2" = bquote(phi[2]), #
+  "V3" = bquote(phi[3]), "geP" = bquote(widehat(GE)[P]))#
+#
+pp2 = ggplot(shap2, aes(x = learner, y = mse, fill = feature)) + #
+  geom_bar(stat = "identity", colour = "white", pos = "stack") + #
+  geom_text(aes(label = lab), position = position_stack(vjust = 0.5), size = 3) + #
+  coord_flip() + #
+  scale_fill_manual(values = col, name = " performance \n explained by", labels = legend) +#
+  labs(title = "(a) Comparing the model performance and SFIMP values across different models", #
+    x = "", y = "performance (MSE)")#
+#
+grid.arrange(pp2, pp, heights = c(3, 5))
+filename <- file.choose()#
+predictive_failure <- readRDS(filename)#
+print(predictive_failure)
+csv_file <- file.choose()#
+data <- read.csv(csv_file)#
+#
+saveRDS(data, file = "predictive_failure.rds")#
+#
+predictive_failure <- readRDS(predictive_failure.rds)#
+print(predictive_failure)
+csv_file <- file.choose()#
+data <- read.csv(csv_file)#
+#
+saveRDS(data, file = "predictive_failure.rds")#
+#
+predictive_failure <- readRDS(predictive_failure.rds)#
+print(predictive_failure)
+# csv_file <- file.choose()#
+# data <- read.csv(csv_file)#
+#
+# saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+print(predictive_failure)
+# csv_file <- file.choose()#
+# data <- read.csv(csv_file)#
+#
+# saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+print(predictive_failure)
+# csv_file <- file.choose()#
+# data <- read.csv(csv_file)#
+#
+# saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+print(predictive_failure)
+# csv_file <- file.choose()#
+# data <- read.csv(csv_file)#
+#
+# saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+print(predictive_failure)
+# csv_file <- file.choose()#
+# data <- read.csv(csv_file)#
+#
+# saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+print(predictive_failure)
+library(mlr)#
+library(mlbench)#
+library(ggplot2)#
+library(gridExtra)#
+library(featureImportance)#
+set.seed(2023)#
+#
+# csv_file <- file.choose()#
+# data <- read.csv(csv_file)#
+#
+# saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+#
+str(predictive_failure)#
+#
+# Create regression task for mlr#
+node.task = makeRegrTask(data = predictive_failure, target = "medv")#
+#
+# Specify the machine learning algorithm with the mlr package#
+lrn = makeLearner("regr.randomForest", ntree = 100)#
+#
+# Create indices for train and test data#
+n = getTaskSize(node.task)#
+train.ind = sample(n, size = 0.6*n)#
+test.ind = setdiff(1:n, train.ind)#
+#
+# Create test data using test indices#
+test = getTaskData(node.task, subset = test.ind)#
+#
+# Fit model on train data using train indices#
+mod = train(lrn, node.task, subset = train.ind)#
+#
+obs.id = sample(1:nrow(test), 20)#
+#
+# Measure feature importance on test data#
+imp = featureImportance(mod, data = test, replace.ids = obs.id, local = TRUE)#
+summary(imp)#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+rdesc = makeResampleDesc("CV", iter = 5)#
+res = resample(lrn, node.task, resampling = rdesc, models = TRUE)#
+imp = featureImportance(res, data = getTaskData(node.task), n.feat.perm = 20, local = TRUE)#
+summary(imp)#
+#
+plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)
+library(mlr)#
+library(mlbench)#
+library(ggplot2)#
+library(gridExtra)#
+library(featureImportance)#
+set.seed(2023)#
+#
+# csv_file <- file.choose()#
+# data <- read.csv(csv_file)#
+#
+# saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+#
+str(predictive_failure)#
+#
+# Create regression task for mlr#
+node.task = makeRegrTask(data = predictive_failure, target = "failure_immenent")#
+#
+# Specify the machine learning algorithm with the mlr package#
+lrn = makeLearner("regr.randomForest", ntree = 100)#
+#
+# Create indices for train and test data#
+n = getTaskSize(node.task)#
+train.ind = sample(n, size = 0.6*n)#
+test.ind = setdiff(1:n, train.ind)#
+#
+# Create test data using test indices#
+test = getTaskData(node.task, subset = test.ind)#
+#
+# Fit model on train data using train indices#
+mod = train(lrn, node.task, subset = train.ind)#
+#
+obs.id = sample(1:nrow(test), 20)#
+#
+# Measure feature importance on test data#
+imp = featureImportance(mod, data = test, replace.ids = obs.id, local = TRUE)#
+summary(imp)#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+rdesc = makeResampleDesc("CV", iter = 5)#
+res = resample(lrn, node.task, resampling = rdesc, models = TRUE)#
+imp = featureImportance(res, data = getTaskData(node.task), n.feat.perm = 20, local = TRUE)#
+summary(imp)#
+#
+plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)
+warnings()
+library(mlr)#
+library(mlbench)#
+library(ggplot2)#
+library(gridExtra)#
+library(featureImportance)#
+set.seed(2023)#
+#
+# csv_file <- file.choose()#
+# data <- read.csv(csv_file)#
+#
+# saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+#
+str(predictive_failure)#
+#
+# Create regression task for mlr#
+node.task = makeRegrTask(data = predictive_failure, target = "predictive_failure")#
+#
+# Specify the machine learning algorithm with the mlr package#
+lrn = makeLearner("regr.randomForest", ntree = 100)#
+#
+# Create indices for train and test data#
+n = getTaskSize(node.task)#
+train.ind = sample(n, size = 0.6*n)#
+test.ind = setdiff(1:n, train.ind)#
+#
+# Create test data using test indices#
+test = getTaskData(node.task, subset = test.ind)#
+#
+# Fit model on train data using train indices#
+mod = train(lrn, node.task, subset = train.ind)#
+#
+obs.id = sample(1:nrow(test), 20)#
+#
+# Measure feature importance on test data#
+imp = featureImportance(mod, data = test, replace.ids = obs.id, local = TRUE)#
+summary(imp)#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+rdesc = makeResampleDesc("CV", iter = 5)#
+res = resample(lrn, node.task, resampling = rdesc, models = TRUE)#
+imp = featureImportance(res, data = getTaskData(node.task), n.feat.perm = 20, local = TRUE)#
+summary(imp)#
+#
+plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)
+library(mlr)#
+library(mlbench)#
+library(ggplot2)#
+library(gridExtra)#
+library(featureImportance)#
+set.seed(2023)#
+#
+csv_file <- file.choose()#
+data <- read.csv(csv_file)#
+# data <- lapply( data, function(col) as.numeric( gsub("-$|\\,", "", col) ) )#
+# data[is.na(data)] <- 0#
+saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+#
+str(predictive_failure)#
+#
+# Create regression task for mlr#
+node.task = makeRegrTask(data = predictive_failure, target = "imminent_failure")#
+#
+# Specify the machine learning algorithm with the mlr package#
+lrn = makeLearner("regr.randomForest", ntree = 100)#
+#
+# Create indices for train and test data#
+n = getTaskSize(node.task)#
+train.ind = sample(n, size = 0.6*n)#
+test.ind = setdiff(1:n, train.ind)#
+#
+# Create test data using test indices#
+test = getTaskData(node.task, subset = test.ind)#
+#
+# Fit model on train data using train indices#
+mod = train(lrn, node.task, subset = train.ind)#
+#
+obs.id = sample(1:nrow(test), 20)#
+#
+# Measure feature importance on test data#
+imp = featureImportance(mod, data = test, replace.ids = obs.id, local = TRUE)#
+summary(imp)#
+warnings()#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+rdesc = makeResampleDesc("CV", iter = 5)#
+res = resample(lrn, node.task, resampling = rdesc, models = TRUE)#
+imp = featureImportance(res, data = getTaskData(node.task), n.feat.perm = 20, local = TRUE)#
+summary(imp)#
+#
+plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)
+library(mlr)#
+library(mlbench)#
+library(ggplot2)#
+library(gridExtra)#
+library(featureImportance)#
+set.seed(2023)#
+#
+csv_file <- file.choose()#
+data <- read.csv(csv_file)#
+data <- lapply(data, as.is = TRUE)#
+#
+# data <- lapply( data, function(col) as.numeric( gsub("-$|\\,", "", col) ) )#
+# data[is.na(data)] <- 0#
+saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+#
+str(predictive_failure)#
+#
+# Create regression task for mlr#
+node.task = makeRegrTask(data = predictive_failure, target = "imminent_failure")#
+#
+# Specify the machine learning algorithm with the mlr package#
+lrn = makeLearner("regr.randomForest", ntree = 100)#
+#
+# Create indices for train and test data#
+n = getTaskSize(node.task)#
+train.ind = sample(n, size = 0.6*n)#
+test.ind = setdiff(1:n, train.ind)#
+#
+# Create test data using test indices#
+test = getTaskData(node.task, subset = test.ind)#
+#
+# Fit model on train data using train indices#
+mod = train(lrn, node.task, subset = train.ind)#
+#
+obs.id = sample(1:nrow(test), 20)#
+#
+# Measure feature importance on test data#
+imp = featureImportance(mod, data = test, replace.ids = obs.id, local = TRUE)#
+summary(imp)#
+warnings()#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+rdesc = makeResampleDesc("CV", iter = 5)#
+res = resample(lrn, node.task, resampling = rdesc, models = TRUE)#
+imp = featureImportance(res, data = getTaskData(node.task), n.feat.perm = 20, local = TRUE)#
+summary(imp)#
+#
+plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)
+library(mlr)#
+library(mlbench)#
+library(ggplot2)#
+library(gridExtra)#
+library(featureImportance)#
+set.seed(2023)#
+#
+csv_file <- file.choose()#
+data <- read.csv(csv_file)#
+data <- lapply(data, as.is = TRUE)#
+#
+# data <- lapply( data, function(col) as.numeric( gsub("-$|\\,", "", col) ) )#
+# data[is.na(data)] <- 0#
+saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+#
+str(predictive_failure)#
+#
+# Create regression task for mlr#
+node.task = makeRegrTask(data = predictive_failure, target = "predictive_node_failure")#
+#
+# Specify the machine learning algorithm with the mlr package#
+lrn = makeLearner("regr.randomForest", ntree = 100)#
+#
+# Create indices for train and test data#
+n = getTaskSize(node.task)#
+train.ind = sample(n, size = 0.6*n)#
+test.ind = setdiff(1:n, train.ind)#
+#
+# Create test data using test indices#
+test = getTaskData(node.task, subset = test.ind)#
+#
+# Fit model on train data using train indices#
+mod = train(lrn, node.task, subset = train.ind)#
+#
+obs.id = sample(1:nrow(test), 20)#
+#
+# Measure feature importance on test data#
+imp = featureImportance(mod, data = test, replace.ids = obs.id, local = TRUE)#
+summary(imp)#
+warnings()#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+rdesc = makeResampleDesc("CV", iter = 5)#
+res = resample(lrn, node.task, resampling = rdesc, models = TRUE)#
+imp = featureImportance(res, data = getTaskData(node.task), n.feat.perm = 20, local = TRUE)#
+summary(imp)#
+#
+plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)
+warnings()
+library(mlr)#
+library(mlbench)#
+library(ggplot2)#
+library(gridExtra)#
+library(featureImportance)#
+set.seed(2023)#
+#
+# csv_file <- file.choose()#
+# data <- read.csv(csv_file)#
+# data <- lapply(data, as.is = TRUE)#
+#
+# data <- lapply( data, function(col) as.numeric( gsub("-$|\\,", "", col) ) )#
+# data[is.na(data)] <- 0#
+# saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+#
+str(predictive_failure)#
+#
+# Create regression task for mlr#
+node.task = makeRegrTask(data = predictive_failure, target = "predictive_node_failure")#
+#
+# Specify the machine learning algorithm with the mlr package#
+lrn = makeLearner("regr.randomForest", ntree = 100)#
+#
+# Create indices for train and test data#
+n = getTaskSize(node.task)#
+train.ind = sample(n, size = 0.6*n)#
+test.ind = setdiff(1:n, train.ind)#
+#
+# Create test data using test indices#
+test = getTaskData(node.task, subset = test.ind)#
+#
+# Fit model on train data using train indices#
+mod = train(lrn, node.task, subset = train.ind)#
+#
+obs.id = sample(1:nrow(test), 20)#
+#
+# Measure feature importance on test data#
+imp = featureImportance(mod, data = test, replace.ids = obs.id, local = TRUE)#
+summary(imp)#
+warnings()#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+rdesc = makeResampleDesc("CV", iter = 5)#
+res = resample(lrn, node.task, resampling = rdesc, models = TRUE)#
+imp = featureImportance(res, data = getTaskData(node.task), n.feat.perm = 20, local = TRUE)#
+summary(imp)#
+#
+plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)
+library(mlr)#
+library(mlbench)#
+library(ggplot2)#
+library(gridExtra)#
+library(featureImportance)#
+set.seed(2023)#
+#
+csv_file <- file.choose()#
+data <- read.csv(csv_file)#
+data <- lapply(data, as.is = TRUE)#
+#
+# data <- lapply( data, function(col) as.numeric( gsub("-$|\\,", "", col) ) )#
+# data[is.na(data)] <- 0#
+saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+#
+str(predictive_failure)#
+#
+# Create regression task for mlr#
+node.task = makeRegrTask(data = predictive_failure, target = "predictive_node_failure")#
+#
+# Specify the machine learning algorithm with the mlr package#
+lrn = makeLearner("regr.randomForest", ntree = 100)#
+#
+# Create indices for train and test data#
+n = getTaskSize(node.task)#
+train.ind = sample(n, size = 0.6*n)#
+test.ind = setdiff(1:n, train.ind)#
+#
+# Create test data using test indices#
+test = getTaskData(node.task, subset = test.ind)#
+#
+# Fit model on train data using train indices#
+mod = train(lrn, node.task, subset = train.ind)#
+#
+obs.id = sample(1:nrow(test), 20)#
+#
+# Measure feature importance on test data#
+imp = featureImportance(mod, data = test, replace.ids = obs.id, local = TRUE)#
+summary(imp)#
+warnings()#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+rdesc = makeResampleDesc("CV", iter = 5)#
+res = resample(lrn, node.task, resampling = rdesc, models = TRUE)#
+imp = featureImportance(res, data = getTaskData(node.task), n.feat.perm = 20, local = TRUE)#
+summary(imp)#
+#
+plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)
 install.packages("devtools")
-evtools::install_github("giuseppec/featureImportance")
-devtools::install_github("giuseppec/featureImportance")
-source("ecml-demo/application_pi_simulation.R")
-install.packages("pacman")
-source("ecml-demo/application_pi_simulation.R")
-pacman::p_load("rsm")
-source("ecml-demo/application_pi_simulation.R")
-devtools::install_github("giuseppec/featureImportance")
-source("ecml-demo/application_pi_simulation.R")
-pacman::p_load("rsm, farff")
-source("ecml-demo/application_pi_simulation.R")
-install.packages("BiocManager")
-BiocManager::install(version = "3.16")
-BiocManager::install()
-install.packages('BiocManager')
-chooseCRANmirror()
-install.packages('BiocManager')
-source("ecml-demo/application_pi_simulation.R")
-pacman::p_load("rsm,farff")
-pacman::p_load("farff")
-source("ecml-demo/application_pi_simulation.R")
-pacman::p_load("snow")
-source("ecml-demo/application_pi_simulation.R")
-pacman::p_load("mlr")
-source("ecml-demo/application_pi_simulation.R")
-pacman::p_load("OpenML")
-source("ecml-demo/application_pi_simulation.R")
-pacman::p_load("batchtools")
-source("ecml-demo/application_pi_simulation.R")
-source("ecml-demo/application_importance_realdata.R")
-source("ecml-demo/application_shapley_simulation.R")
+install.packages("devtools")
+devtools::install_github("emmett08/featureImportance")
+devtools::install_github("emmett08/featureImportance")
+library(mlr)#
+library(mlbench)#
+library(ggplot2)#
+library(gridExtra)#
+library(featureImportance)#
+set.seed(2023)#
+#
+# csv_file <- file.choose()#
+# data <- read.csv(csv_file)#
+# data <- lapply(data, as.is = TRUE)#
+#
+# data <- lapply( data, function(col) as.numeric( gsub("-$|\\,", "", col) ) )#
+# data[is.na(data)] <- 0#
+# saveRDS(data, file = "predictive_failure.rds")#
+#
+rds_object = file.choose()#
+predictive_failure <- readRDS(rds_object)#
+#
+str(predictive_failure)#
+#
+# Create regression task for mlr#
+node.task = makeRegrTask(data = predictive_failure, target = "predictive_node_failure")#
+#
+# Specify the machine learning algorithm with the mlr package#
+lrn = makeLearner("regr.randomForest", ntree = 100)#
+#
+# Create indices for train and test data#
+n = getTaskSize(node.task)#
+train.ind = sample(n, size = 0.6*n)#
+test.ind = setdiff(1:n, train.ind)#
+#
+# Create test data using test indices#
+test = getTaskData(node.task, subset = test.ind)#
+#
+# Fit model on train data using train indices#
+mod = train(lrn, node.task, subset = train.ind)#
+#
+obs.id = sample(1:nrow(test), 20)#
+#
+# Measure feature importance on test data#
+imp = featureImportance(mod, data = test, replace.ids = obs.id, local = TRUE)#
+summary(imp)#
+warnings()#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+# Plot PI and ICI curves for the lstat feature#
+pi.curve = plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)#
+ici.curves = plotImportance(imp, feat = "lstat", mid = "mse", individual = TRUE, hline = FALSE)#
+grid.arrange(pi.curve, ici.curves, nrow = 1)#
+#
+rdesc = makeResampleDesc("CV", iter = 5)#
+res = resample(lrn, node.task, resampling = rdesc, models = TRUE)#
+imp = featureImportance(res, data = getTaskData(node.task), n.feat.perm = 20, local = TRUE)#
+summary(imp)#
+#
+plotImportance(imp, feat = "lstat", mid = "mse", individual = FALSE, hline = TRUE)

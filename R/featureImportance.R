@@ -148,11 +148,11 @@ computeFeatureImportanceIteration.default = function(object, i, method, feature,
     replace.id = if (local) rep(i, nrow(data)) else i
   }
   if (local) {
-    feature.value = type.convert(data.perm[ , feature], as.is = TRUE)
+    feature.value = type.convert(data.perm[ , feature])
   } else {
     if (method == "permute" | any(is.na(feature)))
       feature.value = NULL else
-        feature.value = unique(type.convert(data.perm[ , feature]), as.is = TRUE)
+        feature.value = unique(type.convert(data.perm[ , feature]))
   }
   # measure performance when feature is shuffled
   permuted.perf = measurePerformance(object, data = data.perm, target = target,
